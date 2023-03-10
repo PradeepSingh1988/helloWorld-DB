@@ -54,6 +54,7 @@ class BSTree(object):
                 parent = current
                 if key == current.key:
                     current.value = value
+                    break
                 elif key < current.key:
                     current = current.left_child
                     if current == None:
