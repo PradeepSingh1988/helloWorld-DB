@@ -14,9 +14,9 @@ class SSTFile(DiskFile):
         super().__init__(
             file_name,
             read_only,
-            SSTFileEncoder(SST_HEADER_FORMAT, SST_HEADER_SIZE, CRC_FORMAT),
             os_sync,
         )
+        self._encoder = SSTFileEncoder(SST_HEADER_FORMAT, SST_HEADER_SIZE, CRC_FORMAT)
 
     def append(self, value):
         if self._wfh is None:

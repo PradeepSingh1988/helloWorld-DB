@@ -14,9 +14,9 @@ class WalFile(DiskFile):
         super().__init__(
             file_name,
             read_only,
-            WalFileEncoder(WAL_HEADER_FORMAT, WAL_HEADER_SIZE, CRC_FORMAT),
             os_sync,
         )
+        self._encoder = WalFileEncoder(WAL_HEADER_FORMAT, WAL_HEADER_SIZE, CRC_FORMAT)
 
     def append(self, key, value):
         if self._wfh is None:

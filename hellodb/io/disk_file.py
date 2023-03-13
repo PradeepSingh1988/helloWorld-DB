@@ -4,11 +4,10 @@ from hellodb.utils import FileIOException
 
 
 class DiskFile(object):
-    def __init__(self, file_name, read_only, encoder, os_sync=True):
+    def __init__(self, file_name, read_only, os_sync=True):
         self._wfh, self._rfh = None, None
         self._open(file_name, read_only)
         self._os_sync = os_sync
-        self._encoder = encoder
         self._offset = os.stat(self.name).st_size
 
     def _open(self, file_name, read_only):

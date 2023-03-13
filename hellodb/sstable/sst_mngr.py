@@ -1,10 +1,7 @@
 import os
 from threading import RLock
 
-from hellodb.consts import (
-    IDX_FILE_NAME_FORMAT,
-    SST_FILE_NAME_FORMAT
-)
+from hellodb.consts import IDX_FILE_NAME_FORMAT, SST_FILE_NAME_FORMAT
 from hellodb.index import bst
 from hellodb.io import reader, writer
 from hellodb import utils

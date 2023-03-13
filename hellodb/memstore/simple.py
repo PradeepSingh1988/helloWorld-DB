@@ -26,7 +26,7 @@ class SimpleMemStore(MemStore):
 
     def size_in_bytes(self):
         return sys.getsizeof(self._store)
-    
+
     def get_all_pairs(self):
         sorted_memstore = sorted(self._store.items(), key=lambda x: x[0])
         for key, value in sorted_memstore:
