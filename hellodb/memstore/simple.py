@@ -16,7 +16,7 @@ class SimpleMemStore(MemStore):
         return self._store.get(key)
 
     def delete(self, key):
-        self._store.pop(key)
+        return False if self._store.pop(key, None) is None else True
 
     def contains(self, key):
         return key in self._store
@@ -27,7 +27,16 @@ class SimpleMemStore(MemStore):
     def size_in_bytes(self):
         return sys.getsizeof(self._store)
 
-    def flush_to_disk(self, disk_writer):
+    def flush_to_disk(self):
         sorted_memstore = sorted(self._store.items(), key=lambda x: x[0])
         for key, value in sorted_memstore:
-            disk_writer.write(key, value)
+            print(key, value)
+
+
+if __name__ == "__main__":
+    mem_store = SimpleMemStore()
+    mem_store.put("test", "123")
+    mem_store.put("test1", "123")
+    mem_store.put("helloworld", "123")
+    mem_store.put("123", "123")
+    mem_store.flush_to_disk()

@@ -27,5 +27,5 @@ class MemStore(ABC):
         pass
 
     @abstractmethod
-    def flush_to_disk(self, disk_writer):
+    def get_all_pairs(self):
         pass
