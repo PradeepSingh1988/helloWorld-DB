@@ -29,8 +29,13 @@ class HelloDB(object):
         self._rw_memstore = RWMemstore()
         self._wal_mngr = WalManager(file_path)
         self._flush_queue = Queue()
+        self._do_recoevery()
         self._start_flushing_thread()
 
+    def _do_recoevery(self):
+        self._rebuild_sstable_readers()
+        self._recover_by_replaying_wal_logs()
+        
     def _get_next_id(self):
         sst_files = utils.get_sstfiles(self._file_path)
         if not sst_files:
@@ -78,6 +83,22 @@ class HelloDB(object):
         self._rw_memstore.switch_stores()
         self._flush_queue.put((store_to_flush, current_wal_path))
 
+    def _recover_by_replaying_wal_logs(self):
+        for key, value in self._wal_mngr.replay():
+            self._rw_memstore.put(key, value)
+        if self._rw_memstore.size() > 0:
+            store_to_flush = self._rw_memstore.wo_memstore
+            self._rw_memstore.switch_stores()
+            self._flush_memstore(None, store_to_flush)
+        utils.remove_all_wal_files(self._file_path)
+
+    def _rebuild_sstable_readers(self):
+        sst_files = utils.get_sstfiles(self._file_path)
+        for sst_file in sst_files:
+            sst_file_name = utils.get_file_id_from_absolute_path(sst_file)
+            reader = SSTableROMngr(self._file_path, sst_file_name)
+            self._sst_mngr.add_reader(reader)
+
     def get(self, key):
         with self._lock:
             memstore_val = self._rw_memstore.get(key)
@@ -108,12 +129,13 @@ class HelloDB(object):
 
 
 if __name__ == "__main__":
-    db = HelloDB(".", 5)
-    for i in range(25):
+    db = HelloDB(".", 100)
+    
+    for i in range(1005):
         key = "test{}".format(i)
         db.put(key, str(i))
     time.sleep(1)
-    for i in range(25):
+    for i in range(1005):
         value = db.get("test{}".format(i))
         print(value, i)
     time.sleep(10)
