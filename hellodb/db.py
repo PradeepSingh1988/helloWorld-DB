@@ -132,10 +132,10 @@ class HelloDB(object):
 if __name__ == "__main__":
     db = HelloDB(".", 100)
 
-    for i in range(1005):
-        key = "test{}".format(i)
-        db.put(key, str(i))
-    time.sleep(1)
+    # for i in range(1005):
+    #     key = "test{}".format(i)
+    #     db.put(key, str(i))
+    # time.sleep(1)
     for i in range(1005):
         value = db.get("test{}".format(i))
         print(value, i)

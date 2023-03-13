@@ -81,7 +81,7 @@ class SSTableManager(object):
     def __init__(self):
         self._lock = RLock()
         self._all_sst_readers = []
-        self._current_reader = None
+        self._current_reader = SSTableCollection([])
 
     def add_reader(self, sst_reader):
         with self._lock:

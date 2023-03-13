@@ -26,11 +26,11 @@ class SimpleMemStore(MemStore):
 
     def size_in_bytes(self):
         return sys.getsizeof(self._store)
-
-    def flush_to_disk(self):
+    
+    def get_all_pairs(self):
         sorted_memstore = sorted(self._store.items(), key=lambda x: x[0])
         for key, value in sorted_memstore:
-            print(key, value)
+            yield key, value
 
 
 if __name__ == "__main__":
