@@ -29,9 +29,6 @@ class WalReader(object):
         for key, value in self._file.read_all_entries():
             yield key, value
 
-    def read(self, offset):
-        return self._file.read(offset)
-
 
 class IndexReader(object):
     def __init__(self, file_path):
@@ -58,9 +55,6 @@ class IndexReader(object):
     def read_all(self):
         for key, value in self._file.read_all_entries():
             yield key, value
-
-    def read(self, offset):
-        return self._file.read(offset)
 
 
 class SSTReader(object):
