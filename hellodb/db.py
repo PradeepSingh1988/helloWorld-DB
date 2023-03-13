@@ -35,7 +35,7 @@ class HelloDB(object):
     def _do_recoevery(self):
         self._rebuild_sstable_readers()
         self._recover_by_replaying_wal_logs()
-        
+
     def _get_next_id(self):
         sst_files = utils.get_sstfiles(self._file_path)
         if not sst_files:
@@ -54,6 +54,7 @@ class HelloDB(object):
                 store_to_flush, current_wal_path = self._flush_queue.get()
                 self._flush_memstore(current_wal_path, store_to_flush)
         except Exception as ex:
+            self.logger.exception("Exception happened during flushing")
             self.logger.debug(
                 "Exception {} happened during flushing memstore".format(ex)
             )
@@ -130,11 +131,11 @@ class HelloDB(object):
 
 if __name__ == "__main__":
     db = HelloDB(".", 100)
-    
-    for i in range(1005):
-        key = "test{}".format(i)
-        db.put(key, str(i))
-    time.sleep(1)
+
+    # for i in range(1005):
+    #     key = "test{}".format(i)
+    #     db.put(key, str(i))
+    # time.sleep(1)
     for i in range(1005):
         value = db.get("test{}".format(i))
         print(value, i)

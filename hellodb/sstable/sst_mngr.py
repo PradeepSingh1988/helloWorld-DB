@@ -2,13 +2,10 @@ import os
 from threading import RLock
 
 from hellodb.consts import (
-    CRC_FORMAT,
     IDX_FILE_NAME_FORMAT,
-    SST_FILE_NAME_FORMAT,
-    SST_HEADER_FORMAT,
-    SST_HEADER_SIZE,
+    SST_FILE_NAME_FORMAT
 )
-from hellodb.index import bst, idx_rw
+from hellodb.index import bst
 from hellodb.io import reader, writer
 from hellodb import utils
 
@@ -16,11 +13,10 @@ from hellodb import utils
 class SSTableROMngr(object):
     def __init__(self, sst_file_path, sst_file_name):
         self._index = bst.BSTIndex()
-        self._sst_reader = reader.Reader(
+        self._sst_reader = reader.SSTReader(
             os.path.join(sst_file_path, SST_FILE_NAME_FORMAT.format(sst_file_name)),
-            utils.FileEncoder(SST_HEADER_FORMAT, SST_HEADER_SIZE, CRC_FORMAT),
         )
-        self._index_reader = idx_rw.IndexReader(
+        self._index_reader = reader.IndexReader(
             os.path.join(sst_file_path, IDX_FILE_NAME_FORMAT.format(sst_file_name))
         )
         self._load_index()
@@ -35,7 +31,7 @@ class SSTableROMngr(object):
     def get(self, key):
         offset = self._index.get(key)
         if offset is not None:
-            _, value = self._sst_reader.read(int(offset))
+            value = self._sst_reader.read(offset)
             return value
         else:
             return None
@@ -48,15 +44,16 @@ class SSTableROMngr(object):
 class SSTableRWMngr(object):
     def __init__(self, sst_file_path, sst_file_name):
         self._index = bst.BSTIndex()
-        self._sst_writer = writer.Writer(
+        self._sst_writer = writer.SSTWriter(
             os.path.join(sst_file_path, SST_FILE_NAME_FORMAT.format(sst_file_name)),
-            utils.FileEncoder(SST_HEADER_FORMAT, SST_HEADER_SIZE, CRC_FORMAT),
         )
-        self._index_writer = idx_rw.IndexWriter(sst_file_path, sst_file_name)
+        self._index_writer = writer.IndexWriter(
+            os.path.join(sst_file_path, IDX_FILE_NAME_FORMAT.format(sst_file_name))
+        )
 
     def write_key_value(self, key, value):
-        offset = self._sst_writer.append(key, value)
-        self._index_writer.append(key, str(offset))
+        offset = self._sst_writer.append(value)
+        self._index_writer.append(key, offset)
 
     def close(self):
         self._index_writer.close()

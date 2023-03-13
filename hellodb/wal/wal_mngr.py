@@ -3,31 +3,12 @@ import os
 from threading import Lock
 
 from hellodb.consts import (
-    CRC_FORMAT,
     WAL_FILE_NAME_FORMAT,
-    WAL_HEADER_FORMAT,
-    WAL_HEADER_SIZE,
     FILE_START_INDEX,
 )
 from hellodb.logger import CustomAdapter
 from hellodb.io import reader, writer
 from hellodb import utils
-
-
-class WalFileAppender(writer.Writer):
-    def __init__(self, wal_file):
-        super().__init__(
-            wal_file,
-            utils.FileEncoder(WAL_HEADER_FORMAT, WAL_HEADER_SIZE, CRC_FORMAT),
-        )
-
-
-class WalFileReplayer(reader.Reader):
-    def __init__(self, wal_file):
-        super().__init__(
-            wal_file,
-            utils.FileEncoder(WAL_HEADER_FORMAT, WAL_HEADER_SIZE, CRC_FORMAT),
-        )
 
 
 class WalManager(object):
@@ -57,7 +38,7 @@ class WalManager(object):
             self._wal_file = None
 
     def _create_new_wal_file(self, file_id):
-        self._wal_file = WalFileAppender(
+        self._wal_file = writer.WalWriter(
             os.path.join(self._file_path, WAL_FILE_NAME_FORMAT.format(file_id))
         )
 
@@ -84,7 +65,7 @@ class WalManager(object):
             self.logger.debug("No WAL files found")
             return []
         for wal in wal_files:
-            wal_replayer = WalFileReplayer(wal)
+            wal_replayer = reader.WalReader(wal)
             for key, value in wal_replayer.read_all():
                 yield key, value
 
